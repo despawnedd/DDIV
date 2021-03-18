@@ -28,11 +28,13 @@ import signal
 import glob
 import shutil
 import datetime
+import random
 import logging
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PIL import Image, ImageFont
 from pkg_resources import get_distribution
+import pyautogui
 
 from lib.headerlike import *
 
@@ -143,16 +145,28 @@ class MainUi(QtWidgets.QMainWindow):
 
         self.label = QtWidgets.QLabel()
         self.label.setObjectName("MainImageLabel")
-        self.label.setText(localization["mainUIElements"]["openImgFileText"])
         if config["experimental"]["enableExperimentalUI"]:
             # from https://stackoverflow.com/a/44044110/14558305
             self.label.setStyleSheet("""color: white; 
                                         background: qradialgradient(cx:0.5, cy:0.5, radius: 2.5, fx:0.5, fy:0.5, stop:0 #2E3440, stop:1 black);""")
         self.label.setMinimumSize(16, 16)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
-        mainLabelFont = QtGui.QFont("Selawik", 32)
-        mainLabelFont.setBold(True)
+        mainLabelFont = QtGui.QFont("Selawik", 12)
+        #mainLabelFont.setBold(True)
         self.label.setFont(mainLabelFont)
+
+        # from https://stackoverflow.com/a/29740172/14558305
+        with open(f"data/assets/funfacts/funfacts_{lang}.txt") as f:
+            funFacts = [x.rstrip() for x in f]
+
+        pickedChoice = random.choice(funFacts)
+        with open(f"data/assets/html/{lang}/welcome.html") as f:
+            # from https://stackoverflow.com/a/8369345/14558305
+            welcome = f.read().replace('\n', '')
+            self.label.setText(welcome + pickedChoice)
+        # from https://stackoverflow.com/a/37865172/14558305 and https://doc.qt.io/archives/qt-4.8/qlabel.html#linkActivated
+        self.label.linkActivated.connect(self.simulateMenuOpen)
+        #self.label.linkActivated("https://b").connect(self.openDir)
 
         mainMenu = self.menuBar()
 
@@ -243,10 +257,12 @@ class MainUi(QtWidgets.QMainWindow):
         helpMenu.addAction(aboutButton)
 
         bottomButton = QtWidgets.QToolButton()
+        bottomButton.setObjectName("BottomButton")
         bottomButton.setShortcut("CTRL+ALT+M")
         bottomButton.setMenu(QtWidgets.QMenu(bottomButton))
         bottomButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         bottomButton.setFixedSize(20, 20)
+        bottomButton.setAttribute(QtCore.Qt.WA_NoSystemBackground)
 
         self.bottomButtonCopyDetails = QtWidgets.QAction("&Copy details", self)
         self.bottomButtonCopyDetails.triggered.connect(self.bottomCopyFunc)
@@ -304,13 +320,13 @@ class MainUi(QtWidgets.QMainWindow):
         self.detailsFileIcon.setFixedSize(60, 60)
         self.detailsFileIcon.setScaledContents(True)
         # from https://stackoverflow.com/a/51401997/14558305
-        self.detailsFileIcon.setAttribute(QtCore.Qt.WA_NoSystemBackground);
+        self.detailsFileIcon.setAttribute(QtCore.Qt.WA_NoSystemBackground)
         icon = QtGui.QPixmap("data/assets/img/file.png")
-        self.detailsFileIcon.setPixmap(QtGui.QPixmap(icon))
+        self.detailsFileIcon.setPixmap(icon)
 
         self.fileLabel = QtWidgets.QLabel()
         self.fileLabel.setStyleSheet("color: white;")
-        self.fileLabel.setAttribute(QtCore.Qt.WA_NoSystemBackground);
+        self.fileLabel.setAttribute(QtCore.Qt.WA_NoSystemBackground)
         fileLabelFont = QtGui.QFont("Selawik", 14)
         fileLabelFont.setBold(True)
         self.fileLabel.setFont(fileLabelFont)
@@ -318,18 +334,18 @@ class MainUi(QtWidgets.QMainWindow):
 
         self.dateModifiedLabel = QtWidgets.QLabel()
         self.dateModifiedLabel.setStyleSheet("color: white;")
-        self.dateModifiedLabel.setAttribute(QtCore.Qt.WA_NoSystemBackground);
+        self.dateModifiedLabel.setAttribute(QtCore.Qt.WA_NoSystemBackground)
 
         self.dimensionsLabel = QtWidgets.QLabel()
         self.dimensionsLabel.setStyleSheet("color: white;")
-        self.dimensionsLabel.setAttribute(QtCore.Qt.WA_NoSystemBackground);
+        self.dimensionsLabel.setAttribute(QtCore.Qt.WA_NoSystemBackground)
 
         self.fileLabel.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         self.dateModifiedLabel.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         self.dimensionsLabel.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
 
         btFileInfoVBox1Frame = QtWidgets.QFrame()
-        btFileInfoVBox1Frame.setAttribute(QtCore.Qt.WA_NoSystemBackground);
+        btFileInfoVBox1Frame.setAttribute(QtCore.Qt.WA_NoSystemBackground)
         btFileInfoVBox1 = QtWidgets.QVBoxLayout(btFileInfoVBox1Frame)
         btFileInfoVBox1.setContentsMargins(0, 0, 0, 0)
         btFileInfoVBox1.setAlignment(QtCore.Qt.AlignLeft)
@@ -337,14 +353,14 @@ class MainUi(QtWidgets.QMainWindow):
         btFileInfoVBox1.addWidget(self.dimensionsLabel)
 
         btFileInfoContainerHBoxFrame = QtWidgets.QFrame() # A really long name, I know
-        btFileInfoContainerHBoxFrame.setAttribute(QtCore.Qt.WA_NoSystemBackground);
+        btFileInfoContainerHBoxFrame.setAttribute(QtCore.Qt.WA_NoSystemBackground)
         btFileInfoContainerHBox = QtWidgets.QHBoxLayout(btFileInfoContainerHBoxFrame)
         btFileInfoContainerHBox.setContentsMargins(0, 0, 0, 0)
         btFileInfoContainerHBox.setAlignment(QtCore.Qt.AlignLeft)
         btFileInfoContainerHBox.addWidget(btFileInfoVBox1Frame)
 
         btMainVBoxFrame = QtWidgets.QFrame()
-        btMainVBoxFrame.setAttribute(QtCore.Qt.WA_NoSystemBackground);
+        btMainVBoxFrame.setAttribute(QtCore.Qt.WA_NoSystemBackground)
         btMainVBox = QtWidgets.QVBoxLayout(btMainVBoxFrame)
         btMainVBox.setAlignment(QtCore.Qt.AlignTop)
         btMainVBox.setContentsMargins(0, 0, 0, 0)
@@ -384,6 +400,11 @@ class MainUi(QtWidgets.QMainWindow):
 
         #self.setStyleSheet(stylesheet)
         ascvLogger.info("GUI has been initialized.")
+
+    def simulateMenuOpen(self):
+        # from https://stackoverflow.com/a/34056847/14558305 and https://pyautogui.readthedocs.io/en/latest/keyboard.html
+        # NOTE: only works when the language it set to English (en-us.json)
+        pyautogui.hotkey("alt", "f")
 
     def bottomCopyFunc(self, height):
         print(self.fileLabel.text())
@@ -852,11 +873,11 @@ class MainUi(QtWidgets.QMainWindow):
         textView = QtWidgets.QTextBrowser()
 
         # from https://stackoverflow.com/a/8369345/14558305
-        with open("data/assets/markdown/help.md", "r") as file:
-            data = file.read()
+        with open(f"data/assets/html/{lang}/help.html", "r") as f:
+            data = f.read().replace('\n', '')
 
         textView.setOpenExternalLinks(True)
-        textView.setMarkdown(data)
+        textView.setText(data)
 
         headerHBoxFrame = QtWidgets.QFrame()
         headerHBox = QtWidgets.QHBoxLayout(headerHBoxFrame)
@@ -1103,7 +1124,10 @@ class MainUi(QtWidgets.QMainWindow):
             about.label_10.setText(_translate("Form", get_distribution("PyQt5").version))
         except:
             about.label_10.setText(_translate("Form", "unknown"))
-        about.label_11.setText(_translate("Form", localization["mainUIElements"]["aboutWindow"]["description"]))
+        # from https://stackoverflow.com/a/8369345/14558305
+        with open(f"data/assets/html/{lang}/about.html", "r") as f:
+            desc = f.read().replace('\n', '')
+            about.label_11.setText(_translate("Form", desc))
         about.label_4.setText(_translate("Form", "<a href=\"https://github.com/despawnedd/AscentViewer/\">{}</a>").format(localization["mainUIElements"]["aboutWindow"]["GitHubLink"])) # thanks to Anthony for .format
         about.label_6.setText(_translate("Form", "<a href=\"https://dd.acrazytown.com/AscentViewer/\">{}</a>").format(localization["mainUIElements"]["aboutWindow"]["website"]))
 

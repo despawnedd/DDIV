@@ -68,7 +68,12 @@ QFrame#Bottom
     background: @accentColorDarker;
 }
 
-QToolButton::menu-indicator 
+QToolButton#BottomButton
+{
+    background: @accentColorMain;
+}
+
+QToolButton::menu-indicator#BottomButton
 {
     image: url(data/assets/img/dropdown_arrow.png);
     subcontrol-position: center;

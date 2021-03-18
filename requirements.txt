@@ -1,3 +1,4 @@
 PyQt5==5.15.2
 Pillow~=8.1.2
+PyAutoGUI~=0.9.52
 setuptools~=54.1.1

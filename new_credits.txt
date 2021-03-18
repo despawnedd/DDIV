@@ -169,3 +169,8 @@ https://www.w3schools.com/css/css_padding.asp
 https://forum.qt.io/topic/77778/trying-to-control-individual-qmenu-titles-color/4
 https://stackoverflow.com/questions/10898399/using-variables-in-qt-stylesheets
 https://www.geeksforgeeks.org/python-string-replace/
+https://stackoverflow.com/a/29740172/14558305
+https://stackoverflow.com/a/37865172/14558305
+https://doc.qt.io/archives/qt-4.8/qlabel.html#linkActivated
+https://stackoverflow.com/a/34056847/14558305
+https://pyautogui.readthedocs.io/en/latest/keyboard.html

@@ -1,0 +1,3 @@
+AscentViewer and DDIV were supposed to be two completely different things!
+AscentViewer was originally supposed to be made using the WPF GUI framework!
+AscentViewer has a couple of secrets... try to find them!
